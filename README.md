@@ -1,1 +1,1 @@
-# template-agent-repo
+# template-repo
