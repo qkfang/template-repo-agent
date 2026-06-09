@@ -3,8 +3,11 @@ targetScope = 'resourceGroup'
 @description('Azure location')
 param location string = resourceGroup().location
 
-@description('Base name for resources')
-param baseName string
+@description('Project abbreviation for resources')
+param projectAbbr string
+
+@description('Full project name')
+param projectName string
 
 @description('SKU for App Service plan')
 @allowed([
@@ -20,14 +23,14 @@ param logsContainerName string = 'noise-logs'
 @description('Additional principals to grant Storage Blob Data Contributor on the storage account')
 param principals array = []
 
-var uniqueSuffix = uniqueString(resourceGroup().id)
-var logAnalyticsName = '${baseName}-law'
-var appInsightsName = '${baseName}-appi'
-var storageAccountName = toLower('${baseName}sa')
-var appServicePlanName = '${baseName}-plan'
-var webAppName = '${baseName}-web'
+var uniqueSuffix = uniqueString(resourceGroup().id) // only add to resource if required
+var logAnalyticsName = '${projectAbbr}-law'
+var appInsightsName = '${projectAbbr}-appi'
+var storageAccountName = toLower('${projectAbbr}sa')
+var appServicePlanName = '${projectAbbr}-plan'
+var webAppName = '${projectAbbr}-web'
 
-module monitoring 'monitoring.bicep' = {
+module monitoring './modules/monitoring.bicep' = {
   name: 'monitoring'
   params: {
     location: location
@@ -36,7 +39,7 @@ module monitoring 'monitoring.bicep' = {
   }
 }
 
-module storage 'storage.bicep' = {
+module storage './modules/storage.bicep' = {
   name: 'storage'
   params: {
     location: location
@@ -45,7 +48,7 @@ module storage 'storage.bicep' = {
   }
 }
 
-module appService 'appservice.bicep' = {
+module appService './modules/appservice.bicep' = {
   name: 'appservice'
   params: {
     location: location
@@ -81,7 +84,3 @@ resource principalBlobDataContributorAssignments 'Microsoft.Authorization/roleAs
     principalType: principal.principalType
   }
 }]
-
-output webAppName string = appService.outputs.webAppName
-output storageAccountName string = storage.outputs.storageAccountName
-output logsContainerName string = storage.outputs.logsContainerName
