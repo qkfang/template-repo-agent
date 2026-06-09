@@ -23,12 +23,23 @@ param logsContainerName string = 'noise-logs'
 @description('Additional principals to grant Storage Blob Data Contributor on the storage account')
 param principals array = []
 
+@description('UPN/email addresses of Fabric capacity administrators')
+param fabricAdminMembers array = []
+
 var uniqueSuffix = uniqueString(resourceGroup().id) // only add to resource if required
+
 var logAnalyticsName = '${projectAbbr}-law'
 var appInsightsName = '${projectAbbr}-appi'
 var storageAccountName = toLower('${projectAbbr}sa')
+
 var appServicePlanName = '${projectAbbr}-plan'
 var webAppName = '${projectAbbr}-web'
+
+var aiProjectName = '${projectAbbr}-proj'
+var aiServicesName = '${projectAbbr}-ais'
+var bingSearchName = '${projectAbbr}-bing'
+var fabricCapacityName = '${projectAbbr}fabric'
+
 
 module monitoring './modules/monitoring.bicep' = {
   name: 'monitoring'
@@ -48,6 +59,33 @@ module storage './modules/storage.bicep' = {
   }
 }
 
+module foundry './modules/foundry.bicep' = {
+  name: 'foundry'
+  params: {
+    location: location
+    foundryServicesName: aiServicesName
+    foundryProjectName: aiProjectName
+  }
+}
+
+module bing './modules/bing.bicep' = {
+  name: 'bing'
+  params: {
+    bingSearchName: bingSearchName
+  }
+}
+
+module fabric './modules/fabric.bicep' = {
+  name: 'fabric'
+  params: {
+    location: location
+    capacityName: fabricCapacityName
+    skuName: 'F2'
+    adminMembers: fabricAdminMembers
+  }
+}
+
+
 module appService './modules/appservice.bicep' = {
   name: 'appservice'
   params: {
@@ -60,6 +98,7 @@ module appService './modules/appservice.bicep' = {
     logsContainerName: logsContainerName
   }
 }
+
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-05-01' existing = {
   name: storageAccountName
