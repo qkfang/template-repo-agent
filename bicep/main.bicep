@@ -4,9 +4,11 @@ targetScope = 'resourceGroup'
 param location string = resourceGroup().location
 
 @description('Project abbreviation for resources')
+@minLength(1)
 param projectAbbr string
 
-@description('Full project name')
+@description('Project abbreviation for resources')
+@minLength(1)
 param projectName string
 
 @description('SKU for App Service plan')
@@ -25,8 +27,6 @@ param principals array = []
 
 @description('UPN/email addresses of Fabric capacity administrators')
 param fabricAdminMembers array = []
-
-var uniqueSuffix = uniqueString(resourceGroup().id) // only add to resource if required
 
 var logAnalyticsName = '${projectAbbr}-law'
 var appInsightsName = '${projectAbbr}-appi'

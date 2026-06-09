@@ -11,3 +11,7 @@ param principals = [
   }
 ]
 
+param fabricAdminMembers = [
+  'danielfang@MngEnvMCAP951655.onmicrosoft.com'
+  'fabric@MngEnvMCAP951655.onmicrosoft.com'
+]
