@@ -4,12 +4,15 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/NoiseCapture.Web/**"
+      - "src/Web/**"
       - ".github/workflows/20_deploy_app.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  PROJECT_NAME: '' # {projectName}
 
 jobs:
   build-and-deploy:
@@ -26,11 +29,11 @@ jobs:
           dotnet-quality: 'preview'
 
       - name: Restore
-        working-directory: src/NoiseCapture.Web
+        working-directory: src/Web
         run: dotnet restore NoiseCapture.Web.csproj
 
       - name: Publish
-        working-directory: src/NoiseCapture.Web
+        working-directory: src/Web
         run: dotnet publish NoiseCapture.Web.csproj -c Release -o ${{ github.workspace }}/publish --no-restore
 
       - name: Zip publish output
@@ -47,7 +50,7 @@ jobs:
         with:
           inlineScript: |
             az webapp deploy \
-              --resource-group rg-${{ vars.PROJECT_NAME }} \
+              --resource-group rg-${{ env.PROJECT_NAME }} \
               --name noisecap-web \
               --src-path ${{ github.workspace }}/app.zip \
               --type zip

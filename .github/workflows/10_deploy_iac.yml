@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+env:
+  PROJECT_NAME: '' # {projectName}
+  PROJECT_ABBR: '' # {projectAbbr}
+
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest
@@ -18,19 +22,18 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Azure CLI Login
-        uses: azure/login@v1
+        uses: azure/login@v1 # must use v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}s
 
-    #   - name: Create Resource Group
-    #     run: az group create --name 'rg-${{ vars.PROJECT_NAME }}' --location 'eastus2'
+      - name: Create Resource Group
+        run: az group create --name 'rg-${{ env.PROJECT_NAME }}' --location 'eastus2'
 
       - name: Deploy Bicep
         working-directory: bicep
         run: |
           az deployment group create \
-            --name '${{ vars.PROJECT_NAME }}-dev' \
-            --resource-group 'rg-${{ vars.PROJECT_NAME }}' \
+            --name 'deploy-${{ env.PROJECT_NAME }}' \
+            --resource-group 'rg-${{ env.PROJECT_NAME }}' \
             --template-file './main.bicep' \
-            --parameters './main.bicepparam' \
-            baseName='${{ vars.PROJECT_NAME_ABBR }}'
+            --parameters './main.bicepparam'
